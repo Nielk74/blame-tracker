@@ -68,7 +68,6 @@ class GitAnalyzer:
                 desc="Analyzing git changes",
                 unit="commit",
             ):
-                commit = futures[future]
                 try:
                     commit_changes = future.result()
                     # Merge changes for each file
