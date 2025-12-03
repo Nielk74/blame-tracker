@@ -119,21 +119,24 @@ class GitAnalyzer:
         changes: Dict[str, GitChange] = {}
 
         try:
-            # Get the diff against parent
-            if commit.parents:
-                diffs = commit.parents[0].diff(commit)
-            else:
-                # For the first commit, compare against empty tree
-                diffs = commit.tree.diff(None)
+            # Get parent commit for diff
+            parent_sha = commit.parents[0].hexsha if commit.parents else "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
 
-            for diff in diffs:
-                file_path = diff.b_path or diff.a_path
-                if not file_path:
-                    continue
+            # Use git command to get unified diff with full context
+            diff_text = self.repo.git.diff(
+                parent_sha,
+                commit.hexsha,
+                unified=999,  # Get all lines as context for accurate line tracking
+            )
 
-                # Extract changed line numbers from the diff
-                changed_lines = self._extract_changed_lines(diff)
+            if not diff_text:
+                return changes
 
+            # Parse the unified diff
+            changed_lines_by_file = self._parse_unified_diff(diff_text)
+
+            # Create GitChange objects for each file
+            for file_path, changed_lines in changed_lines_by_file.items():
                 if changed_lines:
                     changes[file_path] = GitChange(
                         file_path=file_path,
@@ -146,49 +149,62 @@ class GitAnalyzer:
                         commit_message=commit.message.split("\n")[0],
                     )
 
-        except Exception:
+        except Exception as e:
+            # Skip commits that cause errors
             pass
 
         return changes
 
-    def _extract_changed_lines(self, diff) -> Set[int]:
-        """Extract line numbers that were changed in a diff.
+    def _parse_unified_diff(self, diff_text: str) -> Dict[str, Set[int]]:
+        """Parse unified diff format to extract added/modified lines per file.
 
         Args:
-            diff: GitPython diff object
+            diff_text: Unified diff output from git
 
         Returns:
-            Set of line numbers that were added or modified
+            Dictionary mapping file paths to sets of line numbers
         """
-        changed_lines: Set[int] = set()
+        changes_by_file: Dict[str, Set[int]] = {}
 
         try:
-            if not diff.diff:
-                return changed_lines
-
-            # Parse the unified diff format
-            diff_text = diff.diff.decode("utf-8", errors="ignore")
+            current_file = None
+            current_line_num = 0
             lines = diff_text.split("\n")
 
-            current_line_num = 0
             for line in lines:
-                # Match hunk headers like @@ -10,5 +10,6 @@
-                hunk_match = re.match(r"@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@", line)
-                if hunk_match:
-                    current_line_num = int(hunk_match.group(1))
+                # Match file headers (for new files)
+                if line.startswith("+++"):
+                    current_file = line[6:]  # Remove "+++b/" prefix
                     continue
 
-                # Only track added/modified lines (starting with +)
-                # Skip file markers and context lines
+                # Match hunk headers like @@ -10,5 +10,6 @@
+                hunk_match = re.match(
+                    r"@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@",
+                    line,
+                )
+                if hunk_match:
+                    # Starting line number for this hunk
+                    current_line_num = int(hunk_match.group(1))
+                    if current_file not in changes_by_file:
+                        changes_by_file[current_file] = set()
+                    continue
+
+                if current_file is None:
+                    continue
+
+                # Track added lines (starting with +)
                 if line.startswith("+") and not line.startswith("+++"):
-                    changed_lines.add(current_line_num)
+                    changes_by_file[current_file].add(current_line_num)
                     current_line_num += 1
-                elif not line.startswith("-"):
-                    # Context lines and other content
-                    if not line.startswith("\\"):  # Skip "\ No newline" markers
-                        current_line_num += 1
+                # Modified/context lines (not deletion or special markers)
+                elif line.startswith("-"):
+                    # Line deleted, don't increment new line num
+                    continue
+                elif not line.startswith("\\"):
+                    # Context line or modified line
+                    current_line_num += 1
 
         except Exception:
             pass
 
-        return changed_lines
+        return changes_by_file
