@@ -38,17 +38,17 @@ class BlameIntersector:
         coverage_data: Dict[str, FileCoverage],
         git_changes: Dict[str, GitChange],
     ) -> List[BlameResult]:
-        """Find which recent commits likely broke tests.
+        """Find covered lines in recent commits.
 
-        Intersects coverage gaps (uncovered lines) with recent git changes
-        to identify suspicious commits that may have broken tests.
+        Intersects covered lines with recent git changes
+        to identify tested code that was recently modified.
 
         Args:
             coverage_data: Coverage data by file path (from Cobertura XML)
             git_changes: Git changes by file path (from git diff)
 
         Returns:
-            List of BlameResult objects sorted by impact (most culprits first)
+            List of BlameResult objects sorted by impact (most covered lines first)
         """
         results: List[BlameResult] = []
 
@@ -57,15 +57,15 @@ class BlameIntersector:
             desc="Intersecting coverage with changes",
             unit="file",
         ):
-            uncovered_lines = file_coverage.get_uncovered_lines()
+            covered_lines = file_coverage.get_covered_lines()
 
-            if not uncovered_lines:
+            if not covered_lines:
                 continue
 
             # Get changes for this file (if any)
             change = git_changes.get(file_path)
             culprit_lines = (
-                uncovered_lines & change.line_numbers
+                covered_lines & change.line_numbers
                 if change
                 else set()
             )
@@ -92,7 +92,7 @@ class BlameIntersector:
 
                 result = BlameResult(
                     file_path=file_path,
-                    total_uncovered_lines=len(uncovered_lines),
+                    total_uncovered_lines=len(covered_lines),
                     uncovered_in_changes=len(culprit_lines),
                     blame_groups=groups,
                 )

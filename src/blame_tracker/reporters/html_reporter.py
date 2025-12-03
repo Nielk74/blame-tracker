@@ -363,17 +363,17 @@ class HtmlReporter:
     <div class="container">
         <header>
             <h1>📊 Blame Tracker Report</h1>
-            <p>Coverage gaps intersected with recent changes</p>
+            <p>Covered lines in recent changes</p>
         </header>
 
         <div class="summary-grid">
             <div class="summary-card">
-                <h3>Total Uncovered Lines</h3>
+                <h3>Total Covered Lines</h3>
                 <div class="value">{{ analysis.total_uncovered }}</div>
                 <div class="unit">lines</div>
             </div>
             <div class="summary-card">
-                <h3>Culprit Lines</h3>
+                <h3>Recently Changed Lines</h3>
                 <div class="value">{{ analysis.total_culprit }}</div>
                 <div class="unit">lines</div>
                 <div class="progress-bar">
@@ -381,9 +381,9 @@ class HtmlReporter:
                 </div>
             </div>
             <div class="summary-card">
-                <h3>Culprit Percentage</h3>
+                <h3>Recent Changes Percentage</h3>
                 <div class="value">{{ "%.1f"|format(analysis.culprit_percentage) }}%</div>
-                <div class="unit">of uncovered</div>
+                <div class="unit">of covered</div>
             </div>
             <div class="summary-card">
                 <h3>Analysis Parameters</h3>
@@ -401,11 +401,11 @@ class HtmlReporter:
                     <h3>{{ result.file_path }}</h3>
                     <div class="file-stats">
                         <div class="stat">
-                            <div class="stat-label">Uncovered</div>
+                            <div class="stat-label">Covered</div>
                             <div class="stat-value">{{ result.total_uncovered_lines }}</div>
                         </div>
                         <div class="stat">
-                            <div class="stat-label">Culprits</div>
+                            <div class="stat-label">Recently Changed</div>
                             <div class="stat-value">{{ result.uncovered_in_changes }}</div>
                         </div>
                         <div class="stat">
@@ -424,11 +424,11 @@ class HtmlReporter:
                     <h3>{{ result.file_path }}</h3>
                     <div class="file-stats">
                         <div class="stat">
-                            <div class="stat-label">Total Uncovered</div>
+                            <div class="stat-label">Total Covered</div>
                             <div class="stat-value">{{ result.total_uncovered_lines }}</div>
                         </div>
                         <div class="stat">
-                            <div class="stat-label">In Recent Changes</div>
+                            <div class="stat-label">Recently Changed</div>
                             <div class="stat-value">{{ result.uncovered_in_changes }}</div>
                         </div>
                         <div class="stat">
@@ -472,8 +472,8 @@ class HtmlReporter:
             </div>
             {% else %}
             <div class="no-results">
-                <p>✓ No coverage gaps found in recent changes!</p>
-                <p>All newly added code is properly covered by tests.</p>
+                <p>✓ No covered lines found in recent changes!</p>
+                <p>No covered code was modified in recent commits.</p>
             </div>
             {% endif %}
         </div>

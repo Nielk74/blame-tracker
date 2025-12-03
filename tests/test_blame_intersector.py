@@ -54,7 +54,7 @@ class TestBlameIntersector:
                 lines=[
                     LineInfo(1, LineStatus.COVERED),
                     LineInfo(2, LineStatus.UNCOVERED),
-                    LineInfo(3, LineStatus.UNCOVERED),
+                    LineInfo(3, LineStatus.COVERED),
                     LineInfo(4, LineStatus.UNCOVERED),
                     LineInfo(5, LineStatus.COVERED),
                 ],
@@ -65,7 +65,7 @@ class TestBlameIntersector:
         git_changes = {
             "test.py": GitChange(
                 file_path="test.py",
-                line_numbers={2, 4},
+                line_numbers={1, 3, 5},
                 author="Test Author",
                 commit_hash="abc123",
             ),
@@ -77,8 +77,8 @@ class TestBlameIntersector:
         assert len(results) == 1
         result = results[0]
         assert result.file_path == "test.py"
-        assert result.total_uncovered_lines == 3
-        assert result.uncovered_in_changes == 2
+        assert result.total_uncovered_lines == 3  # Total covered lines
+        assert result.uncovered_in_changes == 3  # Covered lines that were recently changed
 
     def test_detect_language(self) -> None:
         """Test language detection from file extension."""

@@ -78,6 +78,10 @@ class CoberturaParser:
             if not file_path:
                 continue
 
+            # Prepend workspace prefix if not already present
+            if not file_path.startswith("C:\\workspace\\"):
+                file_path = "C:\\workspace\\" + file_path
+
             # Normalize path to be relative to repo root
             file_path = self._normalize_path(file_path)
 
