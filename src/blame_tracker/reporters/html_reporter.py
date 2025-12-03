@@ -14,7 +14,7 @@ from blame_tracker.models import BlameAnalysis, BlameLineGroup, BlameResult
 
 
 class HtmlReporter:
-    """Generate beautiful HTML reports."""
+    """Generate professional HTML reports."""
 
     def __init__(self, output_path: str) -> None:
         """Initialize HTML reporter.
@@ -60,7 +60,7 @@ class HtmlReporter:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blame Tracker Report</title>
+    <title>Code Coverage Analysis Report</title>
     <style>
         * {
             margin: 0;
@@ -70,263 +70,328 @@ class HtmlReporter:
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f5f5f5;
             color: #333;
             line-height: 1.6;
-            min-height: 100vh;
-            padding: 20px;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
         }
 
         header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #1a1a2e;
             color: white;
-            padding: 40px 20px;
-            text-align: center;
+            padding: 30px 40px;
+            border-bottom: 3px solid #0084d4;
         }
 
         header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: 2em;
+            margin-bottom: 5px;
+            font-weight: 600;
         }
 
-        .summary-grid {
+        header p {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+
+        .metrics-section {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            padding: 30px 20px;
-            background: #f8f9fa;
-            border-bottom: 2px solid #e9ecef;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 25px 40px;
+            background: #f9f9f9;
+            border-bottom: 1px solid #e5e5e5;
         }
 
-        .summary-card {
+        .metric-card {
             background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            text-align: center;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 3px solid #0084d4;
         }
 
-        .summary-card h3 {
-            color: #667eea;
-            font-size: 0.9em;
+        .metric-card h3 {
+            font-size: 0.75em;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
+            color: #666;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
         }
 
-        .summary-card .value {
+        .metric-card .value {
             font-size: 2em;
             font-weight: bold;
-            color: #333;
-        }
-
-        .summary-card .unit {
-            color: #999;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e9ecef;
-            border-radius: 4px;
-            margin-top: 10px;
-            overflow: hidden;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            border-radius: 4px;
-        }
-
-        .content {
-            padding: 30px 20px;
-        }
-
-        .section {
-            margin-bottom: 40px;
-        }
-
-        .section h2 {
-            color: #667eea;
-            font-size: 1.8em;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #667eea;
-        }
-
-        .file-result {
-            background: #f8f9fa;
-            border-left: 4px solid #667eea;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-        }
-
-        .file-result h3 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-
-        .file-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .stat {
-            padding: 10px;
-            background: white;
-            border-radius: 4px;
-            border-left: 3px solid #764ba2;
-        }
-
-        .stat-label {
-            font-size: 0.85em;
-            color: #999;
-            text-transform: uppercase;
+            color: #1a1a2e;
             margin-bottom: 5px;
         }
 
-        .stat-value {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #333;
+        .metric-card .unit {
+            font-size: 0.85em;
+            color: #999;
         }
 
-        .blame-group {
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 35px;
+        }
+
+        .section h2 {
+            font-size: 1.5em;
+            color: #1a1a2e;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e5e5e5;
+            font-weight: 600;
+        }
+
+        .files-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .file-card {
             background: white;
-            border: 1px solid #e9ecef;
+            border: 1px solid #e5e5e5;
             border-radius: 4px;
-            margin-top: 15px;
             overflow: hidden;
         }
 
-        .blame-header {
-            background: #f8f9fa;
-            padding: 15px;
-            border-bottom: 1px solid #e9ecef;
+        .file-header {
+            background: #f9f9f9;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e5e5e5;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
         }
 
-        .blame-header h4 {
-            color: #333;
-            margin-bottom: 8px;
+        .file-header:hover {
+            background: #f0f0f0;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #1a1a2e;
             font-size: 0.95em;
         }
 
-        .blame-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
+        .file-stats {
+            display: flex;
+            gap: 20px;
             font-size: 0.85em;
+        }
+
+        .file-stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-label {
             color: #666;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .toggle-icon {
+            font-size: 0.8em;
+            color: #999;
+            transition: transform 0.2s;
+        }
+
+        .toggle-icon.expanded {
+            transform: rotate(180deg);
+        }
+
+        .file-content {
+            display: none;
+            padding: 20px;
+        }
+
+        .file-content.expanded {
+            display: block;
+        }
+
+        .blame-group {
+            background: #f9f9f9;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .blame-info {
+            padding: 12px 15px;
+            background: white;
+            border-bottom: 1px solid #e5e5e5;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            font-size: 0.85em;
         }
 
         .blame-info-item {
             display: flex;
-            gap: 5px;
+            flex-direction: column;
+            gap: 2px;
         }
 
         .blame-info-label {
-            font-weight: bold;
-            color: #333;
-            min-width: 80px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            font-size: 0.75em;
+            letter-spacing: 0.5px;
+        }
+
+        .blame-info-value {
+            color: #1a1a2e;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .code-viewer {
+            position: relative;
+        }
+
+        .code-tabs {
+            display: flex;
+            background: #f9f9f9;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 0 15px;
+            gap: 0;
+        }
+
+        .code-tab {
+            padding: 10px 15px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85em;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .code-tab:hover {
+            color: #0084d4;
+        }
+
+        .code-tab.active {
+            color: #0084d4;
+            border-bottom-color: #0084d4;
+        }
+
+        .code-content {
+            display: none;
+        }
+
+        .code-content.active {
+            display: block;
         }
 
         .code-block {
-            overflow-x: auto;
-            background: #f5f5f5;
-        }
-
-        .code-block pre {
-            margin: 0;
+            background: #1a1a2e;
             padding: 15px;
-            background: #f5f5f5;
+            overflow-x: auto;
             font-family: "Courier New", monospace;
-            font-size: 0.9em;
-            line-height: 1.4;
+            font-size: 0.85em;
+            color: #e5e5e5;
         }
 
         .code-line {
             display: flex;
-            align-items: baseline;
+            gap: 0;
+            min-height: 1.4em;
         }
 
         .line-number {
-            color: #999;
-            padding-right: 15px;
+            color: #666;
+            padding-right: 20px;
             text-align: right;
             min-width: 50px;
             user-select: none;
+            flex-shrink: 0;
+            background: #0f0f1e;
+        }
+
+        .line-indicator {
+            min-width: 25px;
+            text-align: center;
+            padding-right: 10px;
+            user-select: none;
+            flex-shrink: 0;
+            background: #0f0f1e;
+            color: #666;
+        }
+
+        .line-indicator.added {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .line-indicator.removed {
+            color: #f44336;
+            font-weight: bold;
         }
 
         .line-content {
             flex: 1;
-            word-break: break-word;
             white-space: pre-wrap;
+            word-break: break-word;
+            color: #e5e5e5;
         }
 
-        .context-before .code-line,
-        .context-after .code-line {
-            opacity: 0.7;
+        .line-content.added {
+            background: rgba(76, 175, 80, 0.1);
+            color: #81c784;
         }
 
-        .culprit-lines {
-            background: #fff5f5;
-            border-left: 3px solid #dc3545;
+        .line-content.removed {
+            background: rgba(244, 67, 54, 0.1);
+            color: #e57373;
         }
 
-        .culprit-lines .code-line {
-            background: #fff5f5;
+        .line-content.context {
+            color: #b0bec5;
         }
 
-        .culprit-lines .line-number {
-            color: #dc3545;
-            font-weight: bold;
+        .diff-view {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            background: #1a1a2e;
         }
 
-        /* Syntax highlighting styles */
-        .highlight {
-            background: transparent;
-            padding: 0;
+        .diff-side {
+            border-right: 1px solid #0f0f1e;
         }
 
-        footer {
-            background: #f8f9fa;
-            padding: 20px;
-            text-align: center;
+        .diff-side:last-child {
+            border-right: none;
+        }
+
+        .diff-title {
+            padding: 10px 15px;
+            background: #0f0f1e;
             color: #999;
-            border-top: 1px solid #e9ecef;
-            font-size: 0.9em;
-        }
-
-        .meta-info {
-            color: #666;
-            font-size: 0.95em;
-            margin-bottom: 5px;
-        }
-
-        .metric {
-            display: inline-block;
-            margin-right: 20px;
-        }
-
-        .metric-value {
-            font-weight: bold;
-            color: #667eea;
+            font-size: 0.8em;
+            font-weight: 600;
+            border-bottom: 1px solid #333;
         }
 
         .no-results {
@@ -336,25 +401,49 @@ class HtmlReporter:
         }
 
         .no-results p {
-            font-size: 1.1em;
-            margin-bottom: 10px;
+            font-size: 1em;
+            margin-bottom: 5px;
+        }
+
+        footer {
+            background: #f9f9f9;
+            padding: 20px 40px;
+            text-align: center;
+            color: #999;
+            border-top: 1px solid #e5e5e5;
+            font-size: 0.85em;
         }
 
         @media (max-width: 768px) {
-            header h1 {
-                font-size: 1.8em;
-            }
-
-            .summary-grid {
-                grid-template-columns: 1fr;
+            .metrics-section {
+                grid-template-columns: 1fr 1fr;
+                padding: 15px 20px;
             }
 
             .file-stats {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .diff-view {
                 grid-template-columns: 1fr;
             }
 
-            .blame-info {
-                grid-template-columns: 1fr;
+            .diff-side {
+                border-right: none;
+                border-bottom: 1px solid #0f0f1e;
+            }
+
+            .diff-side:last-child {
+                border-bottom: none;
+            }
+
+            header {
+                padding: 20px;
+            }
+
+            .content {
+                padding: 20px;
             }
         }
     </style>
@@ -362,31 +451,28 @@ class HtmlReporter:
 <body>
     <div class="container">
         <header>
-            <h1>📊 Blame Tracker Report</h1>
-            <p>Covered lines in recent changes</p>
+            <h1>Code Coverage Analysis</h1>
+            <p>Recently modified covered code in version control</p>
         </header>
 
-        <div class="summary-grid">
-            <div class="summary-card">
+        <div class="metrics-section">
+            <div class="metric-card">
                 <h3>Total Covered Lines</h3>
                 <div class="value">{{ analysis.total_uncovered }}</div>
-                <div class="unit">lines</div>
+                <div class="unit">across all files</div>
             </div>
-            <div class="summary-card">
-                <h3>Recently Changed Lines</h3>
+            <div class="metric-card">
+                <h3>Recently Changed</h3>
                 <div class="value">{{ analysis.total_culprit }}</div>
-                <div class="unit">lines</div>
-                <div class="progress-bar">
-                    <div class="progress-bar-fill" style="width: {{ analysis.culprit_percentage }}%"></div>
-                </div>
+                <div class="unit">lines modified</div>
             </div>
-            <div class="summary-card">
-                <h3>Recent Changes Percentage</h3>
+            <div class="metric-card">
+                <h3>Change Density</h3>
                 <div class="value">{{ "%.1f"|format(analysis.culprit_percentage) }}%</div>
-                <div class="unit">of covered</div>
+                <div class="unit">of covered code</div>
             </div>
-            <div class="summary-card">
-                <h3>Analysis Parameters</h3>
+            <div class="metric-card">
+                <h3>Analysis Details</h3>
                 <div class="unit">Last {{ analysis.days_lookback }} days</div>
                 <div class="unit">{{ analysis.results|length }} files analyzed</div>
             </div>
@@ -395,181 +481,212 @@ class HtmlReporter:
         <div class="content">
             {% if analysis.results %}
             <div class="section">
-                <h2>📍 Top Culprits</h2>
-                {% for result in top_culprits[:10] %}
-                <div class="file-result">
-                    <h3>{{ result.file_path }}</h3>
-                    <div class="file-stats">
-                        <div class="stat">
-                            <div class="stat-label">Covered</div>
-                            <div class="stat-value">{{ result.total_uncovered_lines }}</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-label">Recently Changed</div>
-                            <div class="stat-value">{{ result.uncovered_in_changes }}</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-label">Percentage</div>
-                            <div class="stat-value">{{ "%.1f"|format(result.culprit_percentage) }}%</div>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-
-            <div class="section">
-                <h2>🔍 Detailed Analysis</h2>
-                {% for result in results %}
-                <div class="file-result">
-                    <h3>{{ result.file_path }}</h3>
-                    <div class="file-stats">
-                        <div class="stat">
-                            <div class="stat-label">Total Covered</div>
-                            <div class="stat-value">{{ result.total_uncovered_lines }}</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-label">Recently Changed</div>
-                            <div class="stat-value">{{ result.uncovered_in_changes }}</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-label">Percentage</div>
-                            <div class="stat-value">{{ "%.1f"|format(result.culprit_percentage) }}%</div>
-                        </div>
-                    </div>
-
-                    {% for group in result.blame_groups %}
-                    <div class="blame-group">
-                        <div class="blame-header">
-                            <h4>Lines {{ group.start_line }}-{{ group.end_line }}</h4>
-                            <div class="blame-info">
-                                {% for change in group.git_changes %}
-                                <div class="blame-info-item">
-                                    <span class="blame-info-label">Author:</span>
-                                    <span>{{ change.author }}</span>
+                <h2>Modified Files</h2>
+                <div class="files-grid">
+                    {% for result in results %}
+                    <div class="file-card">
+                        <div class="file-header" onclick="toggleFileContent(this)">
+                            <div>
+                                <div class="file-name">{{ result.file_path }}</div>
+                            </div>
+                            <div class="file-stats">
+                                <div class="file-stat">
+                                    <span class="stat-label">Covered:</span>
+                                    <span class="stat-value">{{ result.total_uncovered_lines }}</span>
                                 </div>
-                                <div class="blame-info-item">
-                                    <span class="blame-info-label">Commit:</span>
-                                    <span>{{ change.commit_hash }}</span>
+                                <div class="file-stat">
+                                    <span class="stat-label">Recently Changed:</span>
+                                    <span class="stat-value">{{ result.uncovered_in_changes }}</span>
                                 </div>
-                                <div class="blame-info-item">
-                                    <span class="blame-info-label">Date:</span>
-                                    <span>{{ change.commit_date[:10] }}</span>
+                                <div class="file-stat">
+                                    <span class="stat-label">Coverage:</span>
+                                    <span class="stat-value">{{ "%.1f"|format(result.culprit_percentage) }}%</span>
                                 </div>
-                                <div class="blame-info-item">
-                                    <span class="blame-info-label">Message:</span>
-                                    <span>{{ change.commit_message }}</span>
-                                </div>
-                                {% endfor %}
+                                <span class="toggle-icon">▼</span>
                             </div>
                         </div>
-                        <div class="code-block">
-                            <pre>{{ render_code_lines(group) }}</pre>
+
+                        <div class="file-content">
+                            {% for group in result.blame_groups %}
+                            <div class="blame-group">
+                                <div class="blame-info">
+                                    <div class="blame-info-item">
+                                        <span class="blame-info-label">Lines</span>
+                                        <span class="blame-info-value">{{ group.start_line }}-{{ group.end_line }}</span>
+                                    </div>
+                                    {% for change in group.git_changes %}
+                                    <div class="blame-info-item">
+                                        <span class="blame-info-label">Author</span>
+                                        <span class="blame-info-value">{{ change.author }}</span>
+                                    </div>
+                                    <div class="blame-info-item">
+                                        <span class="blame-info-label">Commit</span>
+                                        <span class="blame-info-value">{{ change.commit_hash }}</span>
+                                    </div>
+                                    <div class="blame-info-item">
+                                        <span class="blame-info-label">Date</span>
+                                        <span class="blame-info-value">{{ change.commit_date[:10] }}</span>
+                                    </div>
+                                    <div class="blame-info-item">
+                                        <span class="blame-info-label">Message</span>
+                                        <span class="blame-info-value">{{ change.commit_message }}</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="code-viewer">
+                                    <div class="code-tabs">
+                                        <button class="code-tab active" onclick="switchCodeView(this, 'unified')">Unified View</button>
+                                        <button class="code-tab" onclick="switchCodeView(this, 'diff')">Side by Side</button>
+                                    </div>
+
+                                    <div class="code-content active" id="unified-view">
+                                        <div class="code-block">
+                                            {{ render_code_lines(group) }}
+                                        </div>
+                                    </div>
+
+                                    <div class="code-content" id="diff-view">
+                                        <div class="code-block">
+                                            <div class="diff-view">
+                                                <div class="diff-side">
+                                                    <div class="diff-title">Before</div>
+                                                    <div>
+                                                        {% for line in group.context_before %}
+                                                        <div class="code-line">
+                                                            <div class="line-number"></div>
+                                                            <div class="line-indicator"></div>
+                                                            <div class="line-content context">{{ line }}</div>
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                                <div class="diff-side">
+                                                    <div class="diff-title">After</div>
+                                                    <div>
+                                                        {% for line in group.context_before %}
+                                                        <div class="code-line">
+                                                            <div class="line-number"></div>
+                                                            <div class="line-indicator"></div>
+                                                            <div class="line-content context">{{ line }}</div>
+                                                        </div>
+                                                        {% endfor %}
+                                                        {% for line in group.culprit_lines %}
+                                                        <div class="code-line">
+                                                            <div class="line-number"></div>
+                                                            <div class="line-indicator added">+</div>
+                                                            <div class="line-content added">{{ line }}</div>
+                                                        </div>
+                                                        {% endfor %}
+                                                        {% for line in group.context_after %}
+                                                        <div class="code-line">
+                                                            <div class="line-number"></div>
+                                                            <div class="line-indicator"></div>
+                                                            <div class="line-content context">{{ line }}</div>
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
                         </div>
                     </div>
                     {% endfor %}
                 </div>
-                {% endfor %}
             </div>
             {% else %}
             <div class="no-results">
-                <p>✓ No covered lines found in recent changes!</p>
-                <p>No covered code was modified in recent commits.</p>
+                <p>No covered lines found in recent changes</p>
+                <p style="font-size: 0.9em;">No covered code was modified in recent commits.</p>
             </div>
             {% endif %}
         </div>
 
         <footer>
-            <div class="meta-info">
-                <p>Generated: {{ generation_date }}</p>
-                <p>
-                    <span class="metric">Lookback period: <span class="metric-value">{{ analysis.days_lookback }} days</span></span>
-                    <span class="metric">Files analyzed: <span class="metric-value">{{ results|length }}</span></span>
-                </p>
-            </div>
+            <p>Generated: {{ generation_date }}</p>
+            <p>Lookback period: {{ analysis.days_lookback }} days | Files analyzed: {{ analysis.results|length }}</p>
         </footer>
     </div>
+
+    <script>
+        function toggleFileContent(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.toggle-icon');
+            content.classList.toggle('expanded');
+            icon.classList.toggle('expanded');
+        }
+
+        function switchCodeView(button, view) {
+            // Get the parent code-viewer
+            const viewer = button.closest('.code-viewer');
+
+            // Update active tab
+            viewer.querySelectorAll('.code-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            button.classList.add('active');
+
+            // Update active content
+            viewer.querySelectorAll('.code-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            const viewId = view === 'unified' ? 'unified-view' : 'diff-view';
+            viewer.querySelector('#' + viewId).classList.add('active');
+        }
+    </script>
 </body>
 </html>
-        """
-
-        env = Environment()
-        template = env.from_string(html_template)
-
-        return template
+"""
+        return Environment().from_string(html_template)
 
     def _render_code_lines(self, group: BlameLineGroup) -> str:
         """Render code lines with syntax highlighting.
 
         Args:
-            group: BlameLineGroup with code
+            group: BlameLineGroup with code lines
 
         Returns:
-            HTML string with highlighted code
+            HTML string with formatted code
         """
-        try:
-            lexer = get_lexer_by_name(group.language)
-        except Exception:
-            lexer = TextLexer()
+        # Determine language
+        language = group.language if group.language else "text"
 
-        formatter = HtmlFormatter(
-            style="monokai",
-            noclasses=True,
-            nobackground=True,
-        )
+        # Combine all lines
+        all_lines = []
 
-        result_html = ""
+        # Add context before
+        for line in group.context_before:
+            all_lines.append(("context", line))
 
-        # Context before
-        for i, line in enumerate(group.context_before):
-            line_num = group.start_line - len(group.context_before) + i
-            result_html += self._format_code_line(
-                line,
-                line_num,
-                "context-before",
+        # Add culprit lines
+        for line in group.culprit_lines:
+            all_lines.append(("culprit", line))
+
+        # Add context after
+        for line in group.context_after:
+            all_lines.append(("context", line))
+
+        # Render each line
+        html_lines = []
+        line_num = max(1, group.start_line - len(group.context_before))
+
+        for line_type, line_content in all_lines:
+            indicator = "+" if line_type == "culprit" else ""
+            indicator_class = "added" if line_type == "culprit" else ""
+            content_class = line_type
+
+            html_lines.append(
+                f'<div class="code-line">'
+                f'<div class="line-number">{line_num}</div>'
+                f'<div class="line-indicator {indicator_class}">{indicator}</div>'
+                f'<div class="line-content {content_class}">{line_content}</div>'
+                f'</div>'
             )
+            line_num += 1
 
-        # Culprit lines
-        for i, line in enumerate(group.culprit_lines):
-            line_num = group.start_line + i
-            result_html += self._format_code_line(
-                line,
-                line_num,
-                "culprit-lines",
-            )
-
-        # Context after
-        for i, line in enumerate(group.context_after):
-            line_num = group.end_line + 1 + i
-            result_html += self._format_code_line(
-                line,
-                line_num,
-                "context-after",
-            )
-
-        return result_html
-
-    def _format_code_line(
-        self,
-        content: str,
-        line_num: int,
-        css_class: str,
-    ) -> str:
-        """Format a single code line with line number.
-
-        Args:
-            content: Line content
-            line_num: Line number
-            css_class: CSS class for styling
-
-        Returns:
-            HTML string
-        """
-        # Escape HTML
-        content = (
-            content.replace("&", "&amp;")
-            .replace("<", "&lt;")
-            .replace(">", "&gt;")
-            .replace('"', "&quot;")
-        )
-
-        return f'<div class="code-line {css_class}"><span class="line-number">{line_num}</span><span class="line-content">{content}</span></div>\n'
+        return "\n".join(html_lines)
