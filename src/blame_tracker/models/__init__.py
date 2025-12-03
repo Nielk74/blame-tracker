@@ -64,6 +64,7 @@ class GitChange:
     commit_hash: str = ""
     commit_date: str = ""
     commit_message: str = ""
+    _commit_timestamp: float = 0.0  # Unix timestamp for accurate comparison
 
     def __hash__(self) -> int:
         return hash(self.file_path)

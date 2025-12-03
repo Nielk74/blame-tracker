@@ -59,6 +59,7 @@ def test_divide_by_zero():
 PYEOF
 
 git add main.py test_main.py
+GIT_COMMITTER_DATE="2025-12-03 10:00:00 +0100" GIT_AUTHOR_DATE="2025-12-03 10:00:00 +0100" \
 git commit -m "Initial: Add math functions with tests"
 
 # ============================================================================
@@ -112,6 +113,7 @@ def test_square():
 PYEOF
 
 git add main.py test_main.py
+GIT_COMMITTER_DATE="2025-12-03 11:00:00 +0100" GIT_AUTHOR_DATE="2025-12-03 11:00:00 +0100" \
 git commit -m "Feature: Add square function with tests"
 
 # ============================================================================
@@ -141,6 +143,7 @@ PYEOF
 # Note: test_main.py not updated, so test_divide_by_zero will fail
 
 git add main.py
+GIT_COMMITTER_DATE="2025-12-03 12:00:00 +0100" GIT_AUTHOR_DATE="2025-12-03 12:00:00 +0100" \
 git commit -m "BUG: Remove zero check from divide - BREAKS test_divide_by_zero"
 
 # ============================================================================
@@ -179,6 +182,7 @@ cat > coverage.xml << 'XMLEOF'
 XMLEOF
 
 git add coverage.xml
+GIT_COMMITTER_DATE="2025-12-03 13:00:00 +0100" GIT_AUTHOR_DATE="2025-12-03 13:00:00 +0100" \
 git commit -m "Coverage report - shows divide() is now uncovered"
 
 echo ""

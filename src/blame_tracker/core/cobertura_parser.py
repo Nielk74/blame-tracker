@@ -1,7 +1,7 @@
 """Parser for Cobertura XML coverage format."""
 
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from lxml import etree
 
@@ -11,13 +11,48 @@ from blame_tracker.models import FileCoverage, LineInfo, LineStatus
 class CoberturaParser:
     """Parse Cobertura XML coverage files."""
 
-    def __init__(self, coverage_file: str) -> None:
+    def __init__(self, coverage_file: str, repo_root: Optional[str] = None) -> None:
         """Initialize parser with coverage file path.
 
         Args:
             coverage_file: Path to Cobertura XML file
+            repo_root: Root of repository (for normalizing absolute paths).
+                      If None, will use directory containing coverage_file.
         """
         self.coverage_file = Path(coverage_file)
+
+        # Auto-detect repo root if not provided
+        if repo_root is None:
+            # Use the directory containing the coverage file as repo root
+            repo_root = str(self.coverage_file.parent)
+
+        self.repo_root = Path(repo_root).resolve()
+
+    def _normalize_path(self, file_path: str) -> str:
+        """Normalize file path to be relative to repo root.
+
+        Handles both absolute and relative paths, converting Windows paths
+        to Unix-style paths for consistency with git.
+
+        Args:
+            file_path: File path from Cobertura XML (may be absolute or relative)
+
+        Returns:
+            Normalized relative path using forward slashes
+        """
+        path = Path(file_path)
+
+        # If absolute path, try to make it relative to repo_root
+        if path.is_absolute():
+            try:
+                relative = path.relative_to(self.repo_root)
+                return str(relative).replace("\\", "/")
+            except ValueError:
+                # Path is not under repo_root, just use the filename
+                return path.name
+
+        # Already relative, just normalize slashes
+        return str(path).replace("\\", "/")
 
     def parse(self) -> Dict[str, FileCoverage]:
         """Parse coverage file and return coverage data by file.
@@ -42,6 +77,9 @@ class CoberturaParser:
             file_path = class_elem.get("filename")
             if not file_path:
                 continue
+
+            # Normalize path to be relative to repo root
+            file_path = self._normalize_path(file_path)
 
             file_coverage = FileCoverage(file_path=file_path)
 

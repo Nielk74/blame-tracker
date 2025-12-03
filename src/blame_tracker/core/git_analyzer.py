@@ -75,10 +75,17 @@ class GitAnalyzer:
                         if file_path not in changes:
                             changes[file_path] = change
                         else:
-                            # Merge line numbers from multiple commits
+                            # Merge line numbers and keep the most recent commit's metadata
                             changes[file_path].line_numbers.update(
                                 change.line_numbers
                             )
+                            # If this change is more recent (using timestamp), update metadata
+                            if change._commit_timestamp > changes[file_path]._commit_timestamp:
+                                changes[file_path].author = change.author
+                                changes[file_path].commit_hash = change.commit_hash
+                                changes[file_path].commit_date = change.commit_date
+                                changes[file_path].commit_message = change.commit_message
+                                changes[file_path]._commit_timestamp = change._commit_timestamp
                 except Exception:
                     # Skip commits that cause errors
                     continue
@@ -146,6 +153,7 @@ class GitAnalyzer:
                             commit.committed_date
                         ).isoformat(),
                         commit_message=commit.message.split("\n")[0],
+                        _commit_timestamp=commit.committed_date,  # Store raw timestamp for comparison
                     )
 
         except Exception as e:

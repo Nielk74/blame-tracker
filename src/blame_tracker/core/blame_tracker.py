@@ -40,7 +40,7 @@ class BlamTracker:
         """
         # Parse coverage data
         print(f"📁 Parsing coverage file: {self.coverage_file}")
-        parser = CoberturaParser(self.coverage_file)
+        parser = CoberturaParser(self.coverage_file, repo_root=self.repo_path)
         coverage_data = parser.parse()
         print(f"✓ Found coverage data for {len(coverage_data)} files")
 
