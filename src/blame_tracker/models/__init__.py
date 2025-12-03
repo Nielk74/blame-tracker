@@ -94,16 +94,24 @@ class BlameLineGroup:
 
 @dataclass
 class BlameResult:
-    """Result of blame analysis for a file."""
+    """Result of blame analysis for a file.
+
+    Shows which uncovered lines (coverage gaps) were recently modified,
+    helping identify which commits likely broke the tests.
+    """
 
     file_path: str
-    total_uncovered_lines: int
-    uncovered_in_changes: int
+    total_uncovered_lines: int  # Total lines not covered by tests
+    uncovered_in_changes: int  # Of those, how many were recently changed
     blame_groups: List[BlameLineGroup] = field(default_factory=list)
 
     @property
     def culprit_percentage(self) -> float:
-        """Percentage of uncovered lines that are in recent changes."""
+        """Percentage of uncovered lines that were recently changed.
+
+        Higher percentage means more recent code is not tested,
+        suggesting a recent commit likely broke tests.
+        """
         if self.total_uncovered_lines == 0:
             return 0.0
         return (self.uncovered_in_changes / self.total_uncovered_lines) * 100

@@ -1,15 +1,17 @@
 # Blame Tracker
 
-Track code coverage gaps intersected with recent git changes. Identify which uncovered lines were recently added to your codebase and prioritize testing efforts.
+Find which recent commits likely **broke your tests**.
+
+This tool identifies uncovered code (coverage gaps) that were recently modified, helping you quickly identify the culprit commits that introduced test failures.
 
 ## Features
 
-- **Coverage Analysis**: Parse Cobertura XML coverage files
-- **Git Integration**: Analyze recent changes in your repository
-- **Multithreaded Processing**: Fast analysis with configurable worker threads
-- **Smart Grouping**: Groups consecutive uncovered lines with context
-- **Beautiful Reports**: Syntax-highlighted HTML reports with comprehensive analysis
-- **Language Support**: Syntax highlighting for C++, C#, Python, JavaScript, TypeScript, PHP, Rust, Go, and more
+- **Coverage Gap Detection**: Parse Cobertura XML to find uncovered code
+- **Git Blame Integration**: Identify which commits changed the uncovered code
+- **Multithreaded Analysis**: Fast processing with configurable worker threads
+- **Smart Line Grouping**: Groups consecutive uncovered lines with 5 lines of context before/after
+- **Professional Reports**: Beautiful HTML reports showing code with git blame information
+- **14+ Language Support**: Syntax highlighting for Python, JavaScript, C++, C#, Java, PHP, Rust, Go, and more
 
 ## Installation
 
@@ -60,27 +62,29 @@ blame-tracker coverage.xml /path/to/repo \
 ## How It Works
 
 ### 1. Coverage Parsing
-Reads Cobertura XML format and identifies all uncovered lines across the codebase.
+Reads Cobertura XML format and identifies all **uncovered lines** (coverage gaps).
 
 ### 2. Git Analysis
-- Extracts commits from the specified time period
+- Extracts commits from the specified time period (e.g., last 30 days)
 - Uses multithreading to analyze changes in parallel
-- Identifies added/modified lines for each file
-- Shows progress with a beautiful progress bar
+- Identifies which lines were **added or modified** in each commit
+- Shows real-time progress with progress bars
 
 ### 3. Blame Intersection
-- Finds uncovered lines that were recently changed
-- Groups consecutive lines together
-- Extracts context (5 lines before and after)
-- Associates git commit information with each group
+- Finds uncovered lines that were **recently changed**
+- Groups consecutive uncovered lines together
+- Extracts context: 5 lines before and after each group
+- Associates git commit information with each suspicious code block
 
 ### 4. HTML Report Generation
-Creates a professional HTML report including:
-- Summary statistics
-- Top culprits (files with most recent uncovered lines)
-- Detailed analysis with syntax highlighting
-- Git blame information (author, commit, date, message)
-- Context around problematic lines
+Creates a professional report showing:
+- **Summary**: Total uncovered lines and how many are recent
+- **Top Culprits**: Files with most suspicious recent changes
+- **Detailed Blame Groups**: Each uncovered code block with:
+  - Context before/after
+  - Git blame (author, commit hash, date, message)
+  - Syntax-highlighted code
+- **Actionable Info**: Quickly identify which commits to investigate
 
 ## Project Structure
 

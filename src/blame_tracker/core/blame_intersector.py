@@ -1,4 +1,11 @@
-"""Blame intersector - finds intersection of coverage gaps and recent changes."""
+"""Blame intersector - finds which recent commits broke tests.
+
+This finds the intersection of:
+1. Lines that are NOT covered by tests (failing/untested code)
+2. Lines that were recently modified (changed in last N days)
+
+Result: Which recent commits likely broke the tests?
+"""
 
 from pathlib import Path
 from typing import Dict, List, Set
@@ -14,9 +21,9 @@ from blame_tracker.models import (
 
 
 class BlameIntersector:
-    """Intersect coverage data with git changes."""
+    """Find commits that likely broke tests by intersecting coverage gaps with recent changes."""
 
-    CONTEXT_LINES = 5  # Lines before and after culprit
+    CONTEXT_LINES = 5  # Lines before and after to show context
 
     def __init__(self, repo_path: str) -> None:
         """Initialize blame intersector.
@@ -31,14 +38,17 @@ class BlameIntersector:
         coverage_data: Dict[str, FileCoverage],
         git_changes: Dict[str, GitChange],
     ) -> List[BlameResult]:
-        """Intersect coverage with git changes.
+        """Find which recent commits likely broke tests.
+
+        Intersects coverage gaps (uncovered lines) with recent git changes
+        to identify suspicious commits that may have broken tests.
 
         Args:
-            coverage_data: Coverage data by file path
-            git_changes: Git changes by file path
+            coverage_data: Coverage data by file path (from Cobertura XML)
+            git_changes: Git changes by file path (from git diff)
 
         Returns:
-            List of BlameResult objects
+            List of BlameResult objects sorted by impact (most culprits first)
         """
         results: List[BlameResult] = []
 
