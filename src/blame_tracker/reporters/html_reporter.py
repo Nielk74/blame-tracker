@@ -49,6 +49,7 @@ class HtmlReporter:
             generation_date=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             results=analysis.results,
             top_culprits=analysis.get_top_culprits(),
+            render_code_lines=self._render_code_lines,
         )
 
     def _get_template(self) -> Template:
@@ -462,7 +463,7 @@ class HtmlReporter:
                             </div>
                         </div>
                         <div class="code-block">
-                            <pre>{{ self._render_code_lines(group) }}</pre>
+                            <pre>{{ render_code_lines(group) }}</pre>
                         </div>
                     </div>
                     {% endfor %}
@@ -493,9 +494,6 @@ class HtmlReporter:
 
         env = Environment()
         template = env.from_string(html_template)
-
-        # Add custom filter for rendering code
-        template.globals["self"] = self
 
         return template
 
